@@ -14,7 +14,7 @@ def set_table(arr, id, no_de_telephone):
         for i in range(len(table)+5):
             table_2.append(None)
         arr.append((id, no_de_telephone))
-        for i in range(len(arr)):1<
+        for i in range(len(arr)):
             set_table(table_2, arr[i][0], arr[i][1])
         print(table_2)
         regen(table_2)
