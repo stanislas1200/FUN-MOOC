@@ -1,6 +1,5 @@
-def foo(liste):
-    return [liste, liste]
+s = [1,2,3,4,5,6,7]
 
-x = [2,3]
-x = foo(x)
-print(x)
+s[len(s)-1:] = []
+
+print(s)
