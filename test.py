@@ -1,5 +1,10 @@
-s = [1,2,3,4,5,6,7]
+voyelles = "aeiouy"
+x = list(enumerate('bonjour'))
+i = 0
+while i < len(x):
+    if x[i][1] in voyelles:
+        del x[i]
+    else:
+        i = i + 1
 
-s[len(s)-1:] = []
-
-print(s)
+print(x)
