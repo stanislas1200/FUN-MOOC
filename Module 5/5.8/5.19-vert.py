@@ -4,5 +4,3 @@ def acrostiche(file):
         for line in f:
             ret += line[0]
         return ret
-
-print(acrostiche('Apollinaire.txt'))
