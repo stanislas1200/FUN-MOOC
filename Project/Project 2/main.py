@@ -13,9 +13,10 @@ def draw_tile(turtle, width, height, color):
 
 def ft_draw_map(turtle):
     # Draw the map
+    size = (width - inventory_width - width/10 - width/10/2) / len(map[0])
     for i in range(len(map)):
         for j in range(len(map[i])):
-            t.goto(-(width/2)/10 * 9 + j*20, -(height/2)/10 * 9 - i*20 + height - height/10 - announcement_height - width/10/2)
+            t.goto(-(width/2)/10 * 9 + j*size, -(height/2)/10 * 9 - i*size + height - height/10 - announcement_height - width/10/2 - 20)
             switcher = {
                 0: "white",
                 1: "grey",
@@ -25,7 +26,7 @@ def ft_draw_map(turtle):
             }
             key = map[i][j]
             color = switcher.get(int(key), "white")
-            draw_tile(turtle, 20, 20, color)
+            draw_tile(turtle, size, size, color)
 
 
 def texte(turtle, text, size, color):
@@ -39,14 +40,14 @@ def player(turtle, size, color, coord):
 
 #### MAIN ####
 width = 600
-height = 600
+height = 800
 announcement_height = height / 10 * 1.5
 inventory_width = width / 10 * 2
 
 # Create the turtle
 t = turtle.Turtle()
 t.speed(0)
-#t.hideturtle()
+t.hideturtle()
 t.penup()
 # Create the screen
 s = turtle.Screen()
