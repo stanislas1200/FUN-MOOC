@@ -15,6 +15,7 @@ def ft_draw_map(turtle):
     # Draw the map
     for i in range(len(map)):
         for j in range(len(map[i])):
+            t.goto(-(width/2)/10 * 9 + j*20, -(height/2)/10 * 9 - i*20 + height - height/10 - announcement_height - width/10/2)
             switcher = {
                 0: "white",
                 1: "grey",
@@ -24,7 +25,6 @@ def ft_draw_map(turtle):
             }
             key = map[i][j]
             color = switcher.get(int(key), "white")
-            t.goto(-(width/2)/10 * 9 + i*20, -(height/2)/10 * 9 + j*20)
             draw_tile(turtle, 20, 20, color)
 
 
@@ -53,7 +53,7 @@ s = turtle.Screen()
 s.title("Python des Neiges") # Title of the window
 s.bgcolor("white") # Set the background color
 s.setup(width, height) # 480x480 pixels
-#s.tracer(0) # Disable the animation
+s.tracer(0) # Disable the animation
 
 # Store map
 map = []
@@ -69,13 +69,14 @@ while (True):
     # Draw the board
     t.goto(-(width/2)/10 * 9, -(height/2)/10 * 9)
     draw_tile(t, width - inventory_width - width/10 - width/10/2, height - height/10 - announcement_height - width/10/2, "#7e9873")
+    t.goto(-(width/2)/10 * 9, -(height/2)/10 * 9)
     ft_draw_map(t)
 
 
     # Draw the inventory
     t.goto(width/2 - inventory_width - (width/2)/10, -(height/2)/10 * 9)
     draw_tile(t, inventory_width, height - height/10 - announcement_height - width/10/2, "#7e9873")
-
+    print("update")
     s.update() # Update the screen
 
 turtle.done()
