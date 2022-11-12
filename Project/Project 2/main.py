@@ -34,6 +34,8 @@ def ft_draw_map(turtle, size):
             if (int(map[i][j]) == -1):
                 t.goto(board[0] + j*size + size/2, board[1] - i*size + height - height/10 - announcement_size[1] - width/10/2 - size - player_size + size/2)
                 player(turtle, player_size, "red")
+    print("Map drawn")
+    s.update()
 
 
 def texte(turtle, text, size, color):
@@ -46,6 +48,39 @@ def player(turtle, size, color):
     turtle.circle(size)
     turtle.end_fill()
 
+
+def ft_move_up():
+    print("up")
+    global player_coord
+    map[player_coord[0]][player_coord[1]] = 5
+    player_coord = (player_coord[0] - 1, player_coord[1])
+    map[player_coord[0]][player_coord[1]] = -1
+    t.goto(-(width / 2) / 10 * 9, -(height / 2) / 10 * 9)
+    ft_draw_map(t, size)
+def ft_move_down():
+    print("down")
+    global player_coord
+    map[player_coord[0]][player_coord[1]] = 5
+    player_coord = (player_coord[0] + 1, player_coord[1])
+    map[player_coord[0]][player_coord[1]] = -1
+    t.goto(-(width / 2) / 10 * 9, -(height / 2) / 10 * 9)
+    ft_draw_map(t, size)
+def ft_move_left():
+    print("left")
+    global player_coord
+    map[player_coord[0]][player_coord[1]] = 5
+    player_coord = (player_coord[0], player_coord[1] - 1)
+    map[player_coord[0]][player_coord[1]] = -1
+    t.goto(-(width / 2) / 10 * 9, -(height / 2) / 10 * 9)
+    ft_draw_map(t, size)
+def ft_move_right():
+    print("right")
+    global player_coord
+    map[player_coord[0]][player_coord[1]] = 5
+    player_coord = (player_coord[0], player_coord[1] + 1)
+    map[player_coord[0]][player_coord[1]] = -1
+    t.goto(-(width / 2) / 10 * 9, -(height / 2) / 10 * 9)
+    ft_draw_map(t, size)
 
 
 #### MAIN ####
@@ -84,41 +119,35 @@ size = (width - inventory_size[0] - width/10 - width/10/2) / len(map[0])
 # Player
 player_size = size * RATIO_PERSONNAGE / 2
 player_coord = (0, 1)
-# Draw the board
+
+
+# Set keyboard bindings
+turtle.listen()
+turtle.onkey(ft_move_up, "Up")
+turtle.onkey(ft_move_down, "Down")
+turtle.onkey(ft_move_left, "Left")
+turtle.onkey(ft_move_right, "Right")
+
+
+# Draw the board one time
+t.goto(board)
+draw_tile(t, board_size, "#7e9873")
+t.goto(-(width / 2) / 10 * 9, -(height / 2) / 10 * 9)
+ft_draw_map(t, size)
+
+# Draw the board Don't need
 while (True):
     # Draw the announcement board
     t.goto(announcement_coord)
     draw_tile(t, announcement_size, "#7e9873")
 
-    # Draw the board
-    t.goto(board)
-    draw_tile(t, board_size, "#7e9873")
-    t.goto(-(width/2)/10 * 9, -(height/2)/10 * 9)
-    ft_draw_map(t, size)
 
     # Draw the player
-    if keyboard.is_pressed('q'):
-        map[player_coord[0]][player_coord[1]] = 5
-        player_coord = (player_coord[0], player_coord[1] - 1)
-        map[player_coord[0]][player_coord[1]] = -1
-    if keyboard.is_pressed('d'):
-        map[player_coord[0]][player_coord[1]] = 5
-        player_coord = (player_coord[0], player_coord[1] + 1)
-        map[player_coord[0]][player_coord[1]] = -1
-    if keyboard.is_pressed('z'):
-        map[player_coord[0]][player_coord[1]] = 5
-        player_coord = (player_coord[0] - 1, player_coord[1])
-        map[player_coord[0]][player_coord[1]] = -1
-    if keyboard.is_pressed('s'):
-        map[player_coord[0]][player_coord[1]] = 5
-        player_coord = (player_coord[0] + 1, player_coord[1])
-        map[player_coord[0]][player_coord[1]] = -1
 
     # Draw the inventory
     t.goto(inventory_coord)
     draw_tile(t, inventory_size, "#7e9873")
 
-    print("update")
     s.update() # Update the screen
 
 turtle.done()
