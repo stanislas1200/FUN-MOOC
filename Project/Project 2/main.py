@@ -5,64 +5,73 @@ from ast import literal_eval as make_tuple
 dev = False
 
 
-def draw_tile(turtle, size, color):
+def draw_tile(box_size, color):
     """Draw a box"""
-    turtle.color(color)
-    turtle.begin_fill()
+    t.color(color)
+    t.begin_fill()
     for i in range(2):
-        turtle.forward(size[0])
-        turtle.left(90)
-        turtle.forward(size[1])
-        turtle.left(90)
-    turtle.end_fill()
+        t.forward(box_size[0])
+        t.left(90)
+        t.forward(box_size[1])
+        t.left(90)
+    t.end_fill()
 
 
-def ft_draw_map(turtle, size):
+def ft_draw_map(tile_size):
     """Draw the entire map and player"""
-    if size * len(map) > height - height / 10 - announcement_size[1] - width / 10 / 2:
-        size = (height - height / 10 - announcement_size[1] - width / 10 / 2) / len(map)
     for i in range(len(map)):
         for j in range(len(map[i])):
-            t.goto(board[0] + j * size,
-                   board[1] - i * size + height - height / 10 - announcement_size[1] - width / 10 / 2 - size)
+            t.goto(board[0] + j * tile_size + map_center,
+                   board[1] - i * tile_size + board_size[1] - tile_size)
             switcher = {
-                -1: "white",
-                0: "white",
-                1: "grey",
-                2: "yellow",
-                3: "orange",
-                4: "green",
-                -2: "wheat"
+                0 or -1: COULEUR_CASES,
+                1: COULEUR_MUR,
+                2: COULEUR_OBJECTIF,
+                3: COULEUR_PORTE,
+                4: COULEUR_OBJET,
+                -2: COULEUR_VUE
             }
             color = switcher.get(int(map[i][j]), "white")
-            draw_tile(turtle, (size, size), color)
-            if (dev):
-                turtle.color("black")
-                turtle.write(map[i][j], font=("Arial", 10, "normal"))
+            draw_tile((tile_size, tile_size), color)
+            if dev:
+                t.color("black")
+                t.write(map[i][j], font=("Arial", 10, "normal"))
                 # turtle.color("blue")
                 # turtle.write((i, j), font=("Arial", 10, "normal"))
-            if (int(map[i][j]) == -1):
-                t.goto(board[0] + j * size + size / 2, board[1] - i * size + height - height / 10 - announcement_size[
-                    1] - width / 10 / 2 - size - player_size + size / 2)
-                player(turtle, player_size, "red")
+            if int(map[i][j]) == -1:
+                t.goto(board[0] + j * tile_size + tile_size / 2 + map_center,
+                       board[1] - i * tile_size + board_size[1] - tile_size - player_size + tile_size / 2)
+                player(player_size, COULEUR_PERSONNAGE)
     print("Map drawn")
     s.update()
 
 
-def player(turtle, size, color):
+def player(size, color):
     """Draw the player"""
-    turtle.color(color)
-    turtle.begin_fill()
-    turtle.circle(size)
-    turtle.end_fill()
+    t.color(color)
+    t.begin_fill()
+    t.circle(size)
+    t.end_fill()
 
 
-def ft_announcement(turtle, text, size, color):
+def ft_announcement(text, size, color):
     """Draw an announcement on the screen"""
     t.goto(announcement_coord)
-    draw_tile(t, announcement_size, "#7e9873")
-    turtle.color(color)
-    turtle.write(text, font=("Arial", size, "normal"))
+    draw_tile(announcement_size, COULEUR_BOX)
+    t.color(color)
+    t.write(text, font=("Arial", size, "normal"))
+
+
+# Inventory
+def ft_inventory():
+    t.goto(inventory_coord)
+    draw_tile(inventory_size, COULEUR_BOX)
+    t.goto(inventory_coord[0] + size / 2, inventory_coord[1] + inventory_size[1] - size)
+    t.color("black")
+    t.write("Inventory :", font=("Arial", 10, "normal"))
+    for i in range(len(inventory)):
+        t.goto(inventory_coord[0] + size / 2, inventory_coord[1] + inventory_size[1] - size - size * (i + 1.5))
+        t.write(f"N°{i}: {inventory[i]}", font=("Arial", 8, "normal"))
 
 
 # Function to update the player position on the map
@@ -70,45 +79,45 @@ def ft_update_player(coord):
     global player_coord
     # Old player erasing
     map[player_coord[0]][player_coord[1]] = -2
-    t.goto(board[0] + player_coord[1] * size,
-           board[1] - player_coord[0] * size + height - height / 10 - announcement_size[1] - width / 10 / 2 - size)
-    draw_tile(t, (size, size), "wheat")
+    t.goto(board[0] + player_coord[1] * size + map_center,
+           board[1] - player_coord[0] * size + board_size[1] - size)
+    draw_tile((size, size), "wheat")
     # New player coord
     player_coord = coord
     # New Tile player drawing
     map[player_coord[0]][player_coord[1]] = -1
-    t.goto(board[0] + player_coord[1] * size,
-           board[1] - player_coord[0] * size + height - height / 10 - announcement_size[1] - width / 10 / 2 - size)
-    draw_tile(t, (size, size), "white")
+    t.goto(board[0] + player_coord[1] * size + map_center,
+           board[1] - player_coord[0] * size + board_size[1] - size)
+    draw_tile((size, size), "white")
     # Player drawing
-    t.goto(board[0] + player_coord[1] * size + size / 2,
-           board[1] - player_coord[0] * size + height - height / 10 - announcement_size[
-               1] - width / 10 / 2 - size - player_size + size / 2)
-    player(t, player_size, "red")
+    t.goto(board[0] + player_coord[1] * size + size / 2 + map_center,
+           board[1] - player_coord[0] * size + board_size[1] - size - player_size + size / 2)
+    player(player_size, COULEUR_PERSONNAGE)
     # Update
     s.update()
+
 
 # All events
 def ft_check_tile(coord):
     """Check if the tile is walkable or if there is an event"""
     if coord == (0, 1):
-        ft_announcement(t, "You Want leave the game ?", 10, "green")
+        ft_announcement("You Want leave the game ?", 10, "green")
         print("You Want leave the game ?")
     if dev:
         ft_update_player(coord)
-    if (map[coord[0]][coord[1]] <= 0):
+    if map[coord[0]][coord[1]] <= 0:
         ft_update_player(coord)
-    elif (map[coord[0]][coord[1]] == 3):
-        ft_announcement(t, "This door is close", 10, "black")
-        if (dico_door[coord][1] == turtle.textinput("Door", dico_door[coord][0])):
+    elif map[coord[0]][coord[1]] == 3:
+        ft_announcement("This door is close", 10, "black")
+        if dico_door[coord][1] == turtle.textinput("Door", dico_door[coord][0]):
             ft_update_player(coord)
-            ft_announcement(t, "Door open", 10, "black")
+            ft_announcement("Door open", 10, "black")
         turtle.listen()
-    elif (map[coord[0]][coord[1]] == 4):
+    elif map[coord[0]][coord[1]] == 4:
         inventory.append(dico_objet[coord])
         ft_inventory()
         ft_update_player(coord)
-    elif (map[coord[0]][coord[1]] == 2):
+    elif map[coord[0]][coord[1]] == 2:
         ft_update_player(coord)
         ft_announcement(t, "You are on a chest", 10, "black")
     else:
@@ -132,36 +141,22 @@ def ft_move_right():
     ft_check_tile((player_coord[0], player_coord[1] + 1))
 
 
-# Inventory
-def ft_inventory():
-    t.goto(inventory_coord)
-    draw_tile(t, inventory_size, "#7e9873")
-    t.goto(inventory_coord[0] + size/2, inventory_coord[1] + inventory_size[1] - size)
-    t.color("black")
-    t.write("Inventory :", font=("Arial", 10, "normal"))
-    for i in range(len(inventory)):
-        t.goto(inventory_coord[0] + size/2, inventory_coord[1] + inventory_size[1] - size - size * (i + 1.5))
-        t.write(f"N°{i}: {inventory[i]}", font=("Arial", 8, "normal"))
-
-
 #### MAIN ####
-width = 580
-height = 780
+width = WINDWOS_SIZE[0]
+height = WINDWOS_SIZE[1]
 
 # Announcement
-announcement_size = (width - width / 10, height / 10 * 1.5)
-announcement_coord = (-(width / 2) / 10 * 9, height / 2 - announcement_size[1] - (width / 2) / 10)
+announcement_size = ANNOUNCEMENT_SIZE
+announcement_coord = ANNOUNCEMENT_COORD
 
 # Inventory
-inventory_size = (width / 10 * 2, height - height / 10 - announcement_size[1] - width / 10 / 2)
-inventory_coord = (width / 2 - inventory_size[0] - (width / 2) / 10, -(height / 2) / 10 * 9)
+inventory_size = INVENTORY_SIZE
+inventory_coord = INVENTORY_COORD
 inventory = []
 
 # Board
-board = (-(width / 2) / 10 * 9, -(height / 2) / 10 * 9)
-board_size = (
-    width - inventory_size[0] - width / 10 - width / 10 / 2,
-    height - height / 10 - announcement_size[1] - width / 10 / 2)
+board = BOARD_COORD
+board_size = BOARD_SIZE
 
 # Create the turtle
 t = turtle.Turtle()
@@ -185,7 +180,7 @@ map = [[int(j) for j in i] for i in map]
 
 # Store dico_objet
 dico_objet = {}
-with open("dico_objets.txt", "r",) as f:
+with open("dico_objets.txt", "r", ) as f:
     for line in f:
         coord_done = 0
         x = ""
@@ -195,9 +190,9 @@ with open("dico_objets.txt", "r",) as f:
                 x += line[i]
             elif line[i].isdigit() and coord_done == 1:
                 y += line[i]
-            if (line[i] == ","):
+            if line[i] == ",":
                 coord_done += 1
-            if (coord_done == 2):
+            if coord_done == 2:
                 dico_objet[(int(x), int(y))] = line[i + 2:]
                 break
 
@@ -213,13 +208,16 @@ with open("dico_portes.txt", "r") as f:
                 x += line[i]
             elif line[i].isdigit() and coord_done == 1:
                 y += line[i]
-            if (line[i] == ","):
+            if line[i] == ",":
                 coord_done += 1
-            if (coord_done == 2):
+            if coord_done == 2:
                 dico_door[(int(x), int(y))] = make_tuple(line[i + 2:])
                 break
 # Tile size
-size = (width - inventory_size[0] - width / 10 - width / 10 / 2) / len(map[0])
+size = board_size[0] / len(map[0]) if not board_size[0] / len(map[0]) * len(map) > board_size[1] \
+    else board_size[1] / len(map)
+map_center = 0 if not board_size[0] / len(map[0]) * len(map) > board_size[1] \
+    else (board_size[0] - size * len(map[0])) / 2
 
 # Player
 player_size = size * RATIO_PERSONNAGE / 2
@@ -237,11 +235,10 @@ if dev:
 
 # Draw the board one time
 t.goto(board)
-draw_tile(t, board_size, "#7e9873")
-t.goto(-(width / 2) / 10 * 9, -(height / 2) / 10 * 9)
-ft_draw_map(t, size)
+draw_tile(board_size, COULEUR_BOX)
+ft_draw_map(size)
 ft_inventory()
-ft_announcement(t, "Welcome to the game", 10, "green")
+ft_announcement("Welcome to the game", 10, "green")
 
 # Draw the board Don't need
 turtle.mainloop()
