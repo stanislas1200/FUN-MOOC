@@ -30,21 +30,46 @@ INVENTORY_COORD = (WINDWOS_SIZE[0] / 2 - BORDER_SIZE - INVENTORY_SIZE[0], -WINDW
 BOARD_SIZE = (WINDWOS_SIZE[0] - BORDER_SIZE * 3 - INVENTORY_SIZE[0], WINDWOS_SIZE[1] - BORDER_SIZE * 3 - ANNOUNCEMENT_SIZE[1])
 BOARD_COORD = (-WINDWOS_SIZE[0] / 2 + BORDER_SIZE, -WINDWOS_SIZE[1] / 2 + BORDER_SIZE)
 
-theme = "discord"
+ANNOUNCEMENT_TEXT_SIZE = ANNOUNCEMENT_SIZE[0]/30
+INVENTORY_TEXT_SIZE = INVENTORY_SIZE[0]/12
+
+theme = "colorswall"
 # Color palette
+COULEUR_MISSING = "#660066"
 if theme == "discord":
-    COULEUR_CASES = '#ffffff'
-    COULEUR_MUR = '#23272a'
-    COULEUR_OBJECTIF = '#fee75c'
-    COULEUR_PORTE = '#3c3c3c'
+    COULEUR_CASES = '#424549'
+    COULEUR_MUR = '#1e2124'
+    COULEUR_OBJECTIF = '#bea925'
+    COULEUR_PORTE = '#c27a2c'
     COULEUR_OBJET = '#7289da'
     COULEUR_VUE = '#99aab5'
     COULEUR_EXTERIEUR = '#ffffff'
-    COULEUR_BOX = '#2c2f33'
+    COULEUR_BOX = '#36393e'
     COULEUR_PERSONNAGE = '#5865f2'
     COULEUR_TEXTE = '#ffffff'
+elif theme == "colorswall":
+    COULEUR_CASES = '#b4c8c8'
+    COULEUR_MUR = '#042e27'
+    COULEUR_OBJECTIF = '#f4d47c'
+    COULEUR_PORTE = '#245454'
+    COULEUR_OBJET = '#90f545'
+    COULEUR_VUE = '#6d949c'
+    COULEUR_EXTERIEUR = '#ffffff'
+    COULEUR_BOX = '#245454'
+    COULEUR_PERSONNAGE = '#fa4454'
+    COULEUR_TEXTE = '#ffffff'
+elif theme == "purple":
+    COULEUR_CASES = '#ba68c8'
+    COULEUR_MUR = '#4a148c'
+    COULEUR_OBJECTIF = '#f9e46a'
+    COULEUR_PORTE = '#6a1b9a'
+    COULEUR_OBJET = '#d500f9'
+    COULEUR_VUE = '#e1bee7'
+    COULEUR_EXTERIEUR = '#ffffff'
+    COULEUR_BOX = '#3e394c'
+    COULEUR_PERSONNAGE = '#ab3cfc'
+    COULEUR_TEXTE = '#ffffff'
 else:
-    # Les valeurs ci-dessous définissent les couleurs des cases du plan
     COULEUR_CASES = 'white'
     COULEUR_MUR = 'grey'
     COULEUR_OBJECTIF = 'yellow'
@@ -52,6 +77,6 @@ else:
     COULEUR_OBJET = 'green'
     COULEUR_VUE = 'wheat'
     COULEUR_EXTERIEUR = 'white'
-    COULEUR_BOX = '#2c2f33'
+    COULEUR_BOX = '#ffffff'
     COULEUR_PERSONNAGE = 'red'
     COULEUR_TEXTE = 'black'
