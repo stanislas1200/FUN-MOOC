@@ -1,124 +1,261 @@
 import turtle
 from CONFIGS import *
-import keyboard
+from ast import literal_eval as make_tuple
+
+dev = True
 
 
-def draw_tile(turtle, size, color):
-    turtle.color(color)
-    turtle.begin_fill()
+def draw_tile(box_size, color):
+    """Draw a box"""
+    t.color(color)
+    t.begin_fill()
     for i in range(2):
-        turtle.forward(size[0])
-        turtle.left(90)
-        turtle.forward(size[1])
-        turtle.left(90)
-    turtle.end_fill()
+        t.forward(box_size[0])
+        t.left(90)
+        t.forward(box_size[1])
+        t.left(90)
+    t.end_fill()
 
-def ft_draw_map(turtle, size):
-    # Draw the map
-    if size * len(map) > height - height/10 - announcement_size[1] - width/10/2:
-        size = (height - height/10 - announcement_size[1] - width/10/2) / len(map)
-    for i in range(len(map)):
-        for j in range(len(map[i])):
-            t.goto(board[0] + j*size, board[1] - i*size + height - height/10 - announcement_size[1] - width/10/2 - size)
+
+def ft_draw_castle_map():
+    """Draw the entire castle_map and player"""
+    t.goto(BOARD_COORD)
+    draw_tile(BOARD_SIZE, COULEUR_BOX)
+    for i in range(len(castle_map)):
+        for j in range(len(castle_map[i])):
+            t.goto(BOARD_COORD[0] + j * tile_size + text_center,
+                   BOARD_COORD[1] - i * tile_size + BOARD_SIZE[1] - tile_size)
             switcher = {
-                -1: "white",
-                0: "white",
-                1: "grey",
-                2: "yellow",
-                3: "orange",
-                4: "green",
-                5: "wheat"
+                -7: "#387D41",
+                -6: "white",
+                -5: "red",
+                -4: "#272C45",
+                -3: "#124E8A",
+                -1: COULEUR_VUE,
+                0: COULEUR_CASES,
+                1: COULEUR_MUR,
+                2: COULEUR_OBJECTIF,
+                3: COULEUR_PORTE,
+                4: COULEUR_OBJET,
+                -2: COULEUR_VUE
             }
-            color = switcher.get(int(map[i][j]), "white")
-            draw_tile(turtle, (size, size), color)
-            if (int(map[i][j]) == -1):
-                t.goto(board[0] + j*size + size/2, board[1] - i*size + height - height/10 - announcement_size[1] - width/10/2 - size - player_size + size/2)
-                player(turtle, player_size, "red")
+            color = switcher.get(int(castle_map[i][j]), COULEUR_MISSING)
+            draw_tile((tile_size, tile_size), color)
+            if int(castle_map[i][j]) == -1:
+                t.goto(BOARD_COORD[0] + j * tile_size + tile_size / 2 + text_center,
+                       BOARD_COORD[1] - i * tile_size + BOARD_SIZE[1] - tile_size - player_size + tile_size / 2)
+                player(player_size, COULEUR_PERSONNAGE)
+    s.update()
 
 
-def texte(turtle, text, size, color):
-    turtle.color(color)
-    turtle.write(text, font=("Arial", size, "normal"))
-
-def player(turtle, size, color):
-    turtle.color(color)
-    turtle.begin_fill()
-    turtle.circle(size)
-    turtle.end_fill()
+def player(size, color):
+    """Draw the player"""
+    t.color(color)
+    t.begin_fill()
+    t.circle(size)
+    t.end_fill()
 
 
+def ft_announcement(text, text_size, color):
+    """Draw an announcement on the screen"""
+    t.goto(ANNOUNCEMENT_COORD)
+    draw_tile(ANNOUNCEMENT_SIZE, COULEUR_BOX)
+    t.color(color)
+    t.goto(ANNOUNCEMENT_COORD[0] + ANNOUNCEMENT_SIZE[0] / 2,
+           ANNOUNCEMENT_COORD[1] + ANNOUNCEMENT_SIZE[1] / 2 - text_size / 2)
+    t.write(text, align="center", font=("Arial", int(text_size), "bold"))
 
-#### MAIN ####
-width = 580
-height = 780
-# Announcement
-announcement_size = (width - width/10, height / 10 * 1.5)
-announcement_coord = (-(width/2)/10 * 9, height/2 - announcement_size[1] - (width/2)/10)
+
 # Inventory
-inventory_size = (width / 10 * 2, height - height/10 - announcement_size[1] - width/10/2)
-inventory_coord = (width/2 - inventory_size[0] - (width/2)/10, -(height/2)/10 * 9)
-# Board
-board = (-(width/2)/10 * 9, -(height/2)/10 * 9)
-board_size = (width - inventory_size[0] - width/10 - width/10/2, height - height/10 - announcement_size[1] - width/10/2)
+def ft_inventory():
+    """Draw the inventory"""
+    t.goto(INVENTORY_COORD)
+    draw_tile(INVENTORY_SIZE, COULEUR_BOX)
+    t.goto(INVENTORY_COORD[0] + tile_size / 2, INVENTORY_COORD[1] + INVENTORY_SIZE[1] - tile_size)
+    t.color(COULEUR_TEXTE)
+    t.write("Inventory :", font=("Arial", int(INVENTORY_TEXT_SIZE), "bold"))
+    for i in range(len(inventory)):
+        t.goto(INVENTORY_COORD[0] + tile_size / 2, INVENTORY_COORD[1] + INVENTORY_SIZE[1] - tile_size -
+               tile_size * (i + 1.5))
+        t.write(f"N°{i}: {inventory[i]}", font=("Arial", int(INVENTORY_TEXT_SIZE / 1.5), "normal"))
 
+
+# Function to update the player position on the castle_map
+def ft_update_player(coord):
+    """Update the player position on the castle_map"""
+    global player_coord
+    # Old player erasing
+    castle_map[player_coord[0]][player_coord[1]] = -2
+    t.goto(BOARD_COORD[0] + player_coord[1] * tile_size + text_center,
+           BOARD_COORD[1] - player_coord[0] * tile_size + BOARD_SIZE[1] - tile_size)
+    draw_tile((tile_size, tile_size), COULEUR_VUE)
+    # New player coord
+    player_coord = coord
+    # New Tile player drawing
+    castle_map[player_coord[0]][player_coord[1]] = -1
+    t.goto(BOARD_COORD[0] + player_coord[1] * tile_size + text_center,
+           BOARD_COORD[1] - player_coord[0] * tile_size + BOARD_SIZE[1] - tile_size)
+    draw_tile((tile_size, tile_size), COULEUR_VUE)
+    # Player drawing
+    t.goto(BOARD_COORD[0] + player_coord[1] * tile_size + tile_size / 2 + text_center,
+           BOARD_COORD[1] - player_coord[0] * tile_size + BOARD_SIZE[1] - tile_size - player_size + tile_size / 2)
+    player(player_size, COULEUR_PERSONNAGE)
+    # Update
+    s.update()
+
+
+# All events
+def ft_check_tile(coord):
+    """Check if the tile is walkable or if there is an event"""
+    global LEVEL_NUMBER, ee1, ee2
+    ft_announcement(f"Tile {castle_map[coord[0]][coord[1]]}, x : {coord[1]}, y : {coord[0]}",
+                    ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
+    if coord == (0, 1):
+        ft_announcement("You Want leave the game ?", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
+    if LEVEL_NUMBER == 1:
+        if coord == (7, 15):
+            ee1 = True
+        elif coord == (12, 15):
+            ee2 = True
+    if castle_map[coord[0]][coord[1]] <= 0:
+        ft_update_player(coord)
+    elif castle_map[coord[0]][coord[1]] == 3:
+        ft_announcement("This door is close", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
+        if dico_door[coord][1] == turtle.textinput("Door", dico_door[coord][0]):
+            ft_update_player(coord)
+            ft_announcement("Door open !", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
+        else:
+            ft_announcement("Wrong answerd", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
+        turtle.listen()
+    elif castle_map[coord[0]][coord[1]] == 4:
+        ft_announcement(f"You found and object: {dico_objet[coord]}", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
+        inventory.append(dico_objet[coord])
+        ft_inventory()
+        ft_update_player(coord)
+    elif castle_map[coord[0]][coord[1]] == 2:
+        ft_update_player(coord)
+        if LEVEL_NUMBER == 0:
+            LEVEL_NUMBER = 1
+            ft_announcement("Congratulation you think you won ?", ANNOUNCEMENT_TEXT_SIZE, COULEUR_TEXTE)
+            ft_loading_level("plan_chateau2.txt", "dico_portes2.txt", "dico_objets2.txt")
+        elif LEVEL_NUMBER == 1:
+            if ee1 and ee2:
+                ee1 = ee2 = 0
+                ft_announcement("Whut what ?", ANNOUNCEMENT_TEXT_SIZE, COULEUR_TEXTE)
+                ft_loading_level("plan_chateau_bonus.txt", "dico_portes.txt", "dico_objets.txt")
+            else:
+                ft_announcement("Congratulation you won !", ANNOUNCEMENT_TEXT_SIZE, COULEUR_TEXTE)
+    elif dev:
+        ft_announcement(f"Tile {castle_map[coord[0]][coord[1]]}, x : {coord[1]}, y : {coord[0]}", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
+        ft_update_player(coord)
+
+
+def ft_loading_level(map_fd, dict_door_fd, dict_objet_fd):
+    """Go to the next level"""
+    global castle_map, dico_door, dico_objet, player_coord, inventory, tile_size, player_size, text_center
+    # Store castle_map
+    castle_map = []
+    # Store dico_objet
+    dico_objet = {}
+    # Store dico_door
+    dico_door = {}
+    # Loading the map
+    with open(map_fd, "r") as f:
+        for line in f:
+            castle_map.append(line.strip().split(" "))
+    castle_map = [[int(j) for j in i] for i in castle_map]
+    # Loading the door
+    with open(dict_door_fd, "r") as f:
+        for line in f:
+            coord_done = 0
+            x = ""
+            y = ""
+            for i in range(len(line)):
+                if line[i].isdigit() and coord_done == 0:
+                    x += line[i]
+                elif line[i].isdigit() and coord_done == 1:
+                    y += line[i]
+                if line[i] == ",":
+                    coord_done += 1
+                if coord_done == 2:
+                    dico_door[(int(x), int(y))] = make_tuple(line[i + 2:])
+                    break
+    # Loading the object
+    with open(dict_objet_fd, "r", ) as f:
+        for line in f:
+            coord_done = 0
+            x = ""
+            y = ""
+            for i in range(len(line)):
+                if line[i].isdigit() and coord_done == 0:
+                    x += line[i]
+                elif line[i].isdigit() and coord_done == 1:
+                    y += line[i]
+                if line[i] == ",":
+                    coord_done += 1
+                if coord_done == 2:
+                    dico_objet[(int(x), int(y))] = line[i + 2:]
+                    break
+    # Tile size
+    tile_size = BOARD_SIZE[0] / len(castle_map[0]) if not BOARD_SIZE[0] / len(castle_map[0]) * len(castle_map) > \
+                                                          BOARD_SIZE[1] else BOARD_SIZE[1] / len(castle_map)
+    text_center = 0 if not BOARD_SIZE[0] / len(castle_map[0]) * len(castle_map) > BOARD_SIZE[1] \
+        else (BOARD_SIZE[0] - tile_size * len(castle_map[0])) / 2
+    # Player
+    inventory = []
+    player_size = (tile_size * RATIO_PERSONNAGE) / 2
+    player_coord = POSITION_DEPART
+    ft_inventory()
+    ft_draw_castle_map()
+    ft_update_player(player_coord)
+
+
+# Function to move
+def ft_move_up():
+    ft_check_tile((player_coord[0] - 1, player_coord[1]))
+
+
+def ft_move_down():
+    ft_check_tile((player_coord[0] + 1, player_coord[1]))
+
+
+def ft_move_left():
+    ft_check_tile((player_coord[0], player_coord[1] - 1))
+
+
+def ft_move_right():
+    ft_check_tile((player_coord[0], player_coord[1] + 1))
+
+
+# Inventory array
+inventory = []
 
 # Create the turtle
 t = turtle.Turtle()
 t.speed(0)
 t.hideturtle()
 t.penup()
+
 # Create the screen
 s = turtle.Screen()
-s.title("Python des Neiges") # Title of the window
-s.bgcolor("white") # Set the background color
-s.setup(width, height) # 480x480 pixels
-s.tracer(0) # Disable the animation
+s.title("Python des Neiges")  # Title of the window
+s.bgcolor(COULEUR_EXTERIEUR)  # Set the background color
+s.setup(WINDOW_SIZE[0], WINDOW_SIZE[1])  # 480x555 pixels
+s.tracer(0)  # Disable the animation
 
-# Store map
-map = []
-with open("plan_chateau.txt", "r") as f:
-    for line in f:
-        map.append(line.strip().split(" "))
+# Set keyboard bindings
+turtle.listen()
+turtle.onkeypress(ft_move_up, "Up")
+turtle.onkeypress(ft_move_down, "Down")
+turtle.onkeypress(ft_move_left, "Left")
+turtle.onkeypress(ft_move_right, "Right")
 
-size = (width - inventory_size[0] - width/10 - width/10/2) / len(map[0])
-# Player
-player_size = size * RATIO_PERSONNAGE / 2
-player_coord = (0, 1)
-# Draw the board
-while (True):
-    # Draw the announcement board
-    t.goto(announcement_coord)
-    draw_tile(t, announcement_size, "#7e9873")
+if dev:
+    turtle.onkey(s.bye, "q")
+ee1 = ee2 = False
 
-    # Draw the board
-    t.goto(board)
-    draw_tile(t, board_size, "#7e9873")
-    t.goto(-(width/2)/10 * 9, -(height/2)/10 * 9)
-    ft_draw_map(t, size)
-
-    # Draw the player
-    if keyboard.is_pressed('q'):
-        map[player_coord[0]][player_coord[1]] = 5
-        player_coord = (player_coord[0], player_coord[1] - 1)
-        map[player_coord[0]][player_coord[1]] = -1
-    if keyboard.is_pressed('d'):
-        map[player_coord[0]][player_coord[1]] = 5
-        player_coord = (player_coord[0], player_coord[1] + 1)
-        map[player_coord[0]][player_coord[1]] = -1
-    if keyboard.is_pressed('z'):
-        map[player_coord[0]][player_coord[1]] = 5
-        player_coord = (player_coord[0] - 1, player_coord[1])
-        map[player_coord[0]][player_coord[1]] = -1
-    if keyboard.is_pressed('s'):
-        map[player_coord[0]][player_coord[1]] = 5
-        player_coord = (player_coord[0] + 1, player_coord[1])
-        map[player_coord[0]][player_coord[1]] = -1
-
-    # Draw the inventory
-    t.goto(inventory_coord)
-    draw_tile(t, inventory_size, "#7e9873")
-
-    print("update")
-    s.update() # Update the screen
-
+# Draw all one time
+ft_loading_level("plan_chateau.txt", "dico_portes.txt", "dico_objets.txt")
+ft_announcement("Welcome to the game", ANNOUNCEMENT_TEXT_SIZE, COULEUR_TEXTE)
+turtle.mainloop()
 turtle.done()
