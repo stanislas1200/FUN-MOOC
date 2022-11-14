@@ -1,9 +1,3 @@
-ZONE_PLAN_MINI = (-240, -240)  # Coin inférieur gauche de la zone d'affichage du plan
-ZONE_PLAN_MAXI = (50, 200)  # Coin supérieur droit de la zone d'affichage du plan
-POINT_AFFICHAGE_ANNONCES = (-240, 240)  # Point d'origine de l'affichage des annonces
-POINT_AFFICHAGE_INVENTAIRE = (70, 210)  # Point d'origine de l'affichage de l'inventaire
-
-
 
 # Couleur et dimension du personnage
 RATIO_PERSONNAGE = 0.9  # Rapport entre diamètre du personnage et dimension des cases
