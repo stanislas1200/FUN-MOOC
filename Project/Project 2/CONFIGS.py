@@ -27,7 +27,9 @@ BOARD_COORD = (-WINDOW_SIZE[0] / 2 + BORDER_SIZE, -WINDOW_SIZE[1] / 2 + BORDER_S
 ANNOUNCEMENT_TEXT_SIZE = ANNOUNCEMENT_SIZE[0]/30
 INVENTORY_TEXT_SIZE = INVENTORY_SIZE[0]/12
 
-theme = "colorswall"
+LEVEL_NUMBER = 0
+
+theme = "discord"
 # Color palette
 COULEUR_MISSING = "#660066"
 if theme == "discord":
