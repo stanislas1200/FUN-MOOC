@@ -2,7 +2,7 @@ import turtle
 from CONFIGS import *
 from ast import literal_eval as make_tuple
 
-dev = True
+dev = False
 
 
 def draw_tile(turtle, size, color):
@@ -99,17 +99,18 @@ def ft_check_tile(coord):
     if (map[coord[0]][coord[1]] <= 0):
         ft_update_player(coord)
     elif (map[coord[0]][coord[1]] == 3):
-        ft_announcement(t, dico_door[coord][0], 10, "black")
-        if (dico_door[coord][1] == input("Enter the password: ")):
+        ft_announcement(t, "This door is close", 10, "black")
+        if (dico_door[coord][1] == turtle.textinput("Door", dico_door[coord][0])):
             ft_update_player(coord)
-        print("Door")
+            ft_announcement(t, "Door open", 10, "black")
+        turtle.listen()
     elif (map[coord[0]][coord[1]] == 4):
         inventory.append(dico_objet[coord])
         ft_inventory()
         ft_update_player(coord)
-        print("Indice")
     elif (map[coord[0]][coord[1]] == 2):
-        print("Chest")
+        ft_update_player(coord)
+        ft_announcement(t, "You are on a chest", 10, "black")
     else:
         print("Idk what u can find there")
 
@@ -243,11 +244,5 @@ ft_inventory()
 ft_announcement(t, "Welcome to the game", 10, "green")
 
 # Draw the board Don't need
-while (True):
-    # Draw the announcement board
-
-    # Draw the player
-
-    # Draw the inventory
-    s.update()  # Update the screen
+turtle.mainloop()
 turtle.done()
