@@ -1,10 +1,4 @@
-voyelles = "aeiouy"
-x = list(enumerate('bonjour'))
-i = 0
-while i < len(x):
-    if x[i][1] in voyelles:
-        del x[i]
-    else:
-        i = i + 1
+import webbrowser
 
-print(x)
+webbrowser.open_new_tab("https://youtu.be/BOfIt_yQSkA")
+
