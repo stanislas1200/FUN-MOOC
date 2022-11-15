@@ -1,4 +1,4 @@
-import turtle
+import turtle, random
 from CONFIGS import *
 from ast import literal_eval as make_tuple
 
@@ -105,11 +105,10 @@ def ft_update_player(coord):
 
 
 # All events
-def ft_check_tile(coord):
+def ft_check_tile(entity, coord):
     """Check if the tile is walkable or if there is an event"""
     global LEVEL_NUMBER, ee1, ee2
-    ft_announcement(f"Tile {castle_map[coord[0]][coord[1]]}, x : {coord[1]}, y : {coord[0]}",
-                    ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
+    ret = False
     if coord == (0, 1):
         ft_announcement("You Want leave the game ?", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
     if LEVEL_NUMBER == 1:
@@ -118,41 +117,44 @@ def ft_check_tile(coord):
         elif coord == (12, 15):
             ee2 = True
     if castle_map[coord[0]][coord[1]] <= 0:
-        ft_update_player(coord)
-    elif castle_map[coord[0]][coord[1]] == 3:
-        ft_announcement("This door is close", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
-        if dico_door[coord][1] == turtle.textinput("Door", dico_door[coord][0]):
-            ft_update_player(coord)
-            ft_announcement("Door open !", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
-        else:
-            ft_announcement("Wrong answerd", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
-        turtle.listen()
-    elif castle_map[coord[0]][coord[1]] == 4:
-        ft_announcement(f"You found and object: {dico_objet[coord]}", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
-        inventory.append(dico_objet[coord])
-        ft_inventory()
-        ft_update_player(coord)
-    elif castle_map[coord[0]][coord[1]] == 2:
-        ft_update_player(coord)
-        if LEVEL_NUMBER == 0:
-            LEVEL_NUMBER = 1
-            ft_announcement("Congratulation you think you won ?", ANNOUNCEMENT_TEXT_SIZE, COULEUR_TEXTE)
-            ft_loading_level("plan_chateau2.txt", "dico_portes2.txt", "dico_objets2.txt")
-        elif LEVEL_NUMBER == 1:
-            if ee1 and ee2:
-                ee1 = ee2 = 0
-                ft_announcement("Whut what ?", ANNOUNCEMENT_TEXT_SIZE, COULEUR_TEXTE)
-                ft_loading_level("plan_chateau_bonus.txt", "dico_portes.txt", "dico_objets.txt")
+        ret = True
+    elif entity == 0:
+        if castle_map[coord[0]][coord[1]] == 3:
+            ft_announcement("This door is close", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
+            if dico_door[coord][1] == turtle.textinput("Door", dico_door[coord][0]):
+                ret = True
+                ft_announcement("Door open !", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
             else:
-                ft_announcement("Congratulation you won !", ANNOUNCEMENT_TEXT_SIZE, COULEUR_TEXTE)
-    elif dev:
-        ft_announcement(f"Tile {castle_map[coord[0]][coord[1]]}, x : {coord[1]}, y : {coord[0]}", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
-        ft_update_player(coord)
+                ft_announcement("Wrong answerd", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
+            turtle.listen()
+        elif castle_map[coord[0]][coord[1]] == 4:
+            ft_announcement(f"You found and object: {dico_objet[coord]}", ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
+            inventory.append(dico_objet[coord])
+            ft_inventory()
+            ret = True
+        elif castle_map[coord[0]][coord[1]] == 2:
+            # ft_update_player(coord)
+            if LEVEL_NUMBER == 0:
+                LEVEL_NUMBER = 1
+                ft_announcement("Congratulation you think you won ?", ANNOUNCEMENT_TEXT_SIZE, COULEUR_TEXTE)
+                ft_loading_level("plan_chateau2.txt", "dico_portes2.txt", "dico_objets2.txt")
+            elif LEVEL_NUMBER == 1:
+                if ee1 and ee2:
+                    ee1 = ee2 = 0
+                    ft_announcement("Whut what ?", ANNOUNCEMENT_TEXT_SIZE, COULEUR_TEXTE)
+                    ft_loading_level("plan_chateau_bonus.txt", "dico_portes.txt", "dico_objets.txt")
+                else:
+                    ft_announcement("Congratulation you won !", ANNOUNCEMENT_TEXT_SIZE, COULEUR_TEXTE)
+        elif dev and LEVEL_NUMBER == 0:
+            ft_announcement(f"Tile {castle_map[coord[0]][coord[1]]}, x : {coord[1]}, y : {coord[0]}",
+                            ANNOUNCEMENT_TEXT_SIZE / 1.5, COULEUR_TEXTE)
+            ret = True
+    return ret
 
 
 def ft_loading_level(map_fd, dict_door_fd, dict_objet_fd):
     """Go to the next level"""
-    global castle_map, dico_door, dico_objet, player_coord, inventory, tile_size, player_size, text_center
+    global castle_map, dico_door, dico_objet, player_coord, inventory, tile_size, player_size, text_center, Enemy
     # Store castle_map
     castle_map = []
     # Store dico_objet
@@ -208,23 +210,105 @@ def ft_loading_level(map_fd, dict_door_fd, dict_objet_fd):
     ft_inventory()
     ft_draw_castle_map()
     ft_update_player(player_coord)
+    # enemy
+    if LEVEL_NUMBER == 1:
+        Enemy = [new_mob((12, 15), 1), new_mob((7, 15), 1)]
+        turtle.ontimer(ft_enemie, 1000)
 
 
 # Function to move
 def ft_move_up():
-    ft_check_tile((player_coord[0] - 1, player_coord[1]))
+    ft_update_player((player_coord[0] - 1, player_coord[1])) if ft_check_tile(0,
+        (player_coord[0] - 1, player_coord[1])) else None
 
 
 def ft_move_down():
-    ft_check_tile((player_coord[0] + 1, player_coord[1]))
+    ft_update_player((player_coord[0] + 1, player_coord[1])) if ft_check_tile(0,
+        (player_coord[0] + 1, player_coord[1])) else None
 
 
 def ft_move_left():
-    ft_check_tile((player_coord[0], player_coord[1] - 1))
+    ft_update_player((player_coord[0], player_coord[1] - 1)) if ft_check_tile(0,
+        (player_coord[0], player_coord[1] - 1)) else None
 
 
 def ft_move_right():
-    ft_check_tile((player_coord[0], player_coord[1] + 1))
+    ft_update_player((player_coord[0], player_coord[1] + 1)) if ft_check_tile(0,
+        (player_coord[0], player_coord[1] + 1)) else None
+
+
+# Enemie
+def ft_enemie():
+    global Enemy
+    for i in Enemy:
+        i.move()
+    turtle.ontimer(ft_enemie, 300)
+
+
+class new_mob:
+    def __init__(self, coord, direction):
+        self.coord = coord
+        self.direction = direction
+        t.goto(BOARD_COORD[0] + self.coord[1] * tile_size + tile_size / 2 + text_center,
+               BOARD_COORD[1] - self.coord[0] * tile_size + BOARD_SIZE[1] - tile_size - player_size + tile_size / 2)
+        player(player_size, "red")
+
+    def change_direction(self):
+        self.temp = [0,1,2,3]
+        switcher = {
+            0: ft_check_tile(1, (self.coord[0], self.coord[1] + 1)),
+            1: ft_check_tile(1, (self.coord[0], self.coord[1] - 1)),
+            2: ft_check_tile(1, (self.coord[0] - 1, self.coord[1])),
+            3: ft_check_tile(1, (self.coord[0] + 1, self.coord[1]))
+        }
+        ret = random.choice(self.temp)
+        while self.temp:
+            if switcher.get(ret) == False:
+                self.temp.remove(ret)
+                ret = random.choice(self.temp)
+            else :
+                print("New direction : ", ret)
+                self.direction = ret
+                break
+
+
+    def move(self):
+        global player_coord
+        if self.coord[0] == player_coord[0] and self.coord[1] == player_coord[1]:
+            ft_announcement("You died !", ANNOUNCEMENT_TEXT_SIZE, COULEUR_TEXTE)
+            player_coord = POSITION_DEPART
+        self.change_direction() if random.randint(0, 100) < 40 else None
+        t.goto(BOARD_COORD[0] + self.coord[1] * tile_size + text_center,
+               BOARD_COORD[1] - self.coord[0] * tile_size + BOARD_SIZE[1] - tile_size)
+        switcher = {
+            -1: COULEUR_VUE,
+            0: COULEUR_CASES,
+        }
+        color = switcher.get(int(castle_map[self.coord[0]][self.coord[1]]), COULEUR_MISSING)
+        draw_tile((tile_size, tile_size), color)
+        if self.direction == 0:  # Right
+            if ft_check_tile(1, (self.coord[0], self.coord[1] + 1)):
+                self.coord = (self.coord[0], self.coord[1] + 1)
+            else:
+                self.direction = random.randint(0, 3)
+        elif self.direction == 1:  # Left
+            if ft_check_tile(1, (self.coord[0], self.coord[1] - 1)):
+                self.coord = (self.coord[0], self.coord[1] - 1)
+            else:
+                self.direction = random.randint(0, 3)
+        elif self.direction == 2:  # Up
+            if ft_check_tile(1, (self.coord[0] - 1, self.coord[1])):
+                self.coord = (self.coord[0] - 1, self.coord[1])
+            else:
+                self.direction = random.randint(0, 3)
+        elif self.direction == 3:  # Down
+            if ft_check_tile(1, (self.coord[0] + 1, self.coord[1])):
+                self.coord = (self.coord[0] + 1, self.coord[1])
+            else:
+                self.direction = random.randint(0, 3)
+        t.goto(BOARD_COORD[0] + self.coord[1] * tile_size + tile_size / 2 + text_center,
+               BOARD_COORD[1] - self.coord[0] * tile_size + BOARD_SIZE[1] - tile_size - player_size + tile_size / 2)
+        player(player_size, "red")
 
 
 # Inventory array
@@ -252,6 +336,7 @@ turtle.onkeypress(ft_move_right, "Right")
 
 if dev:
     turtle.onkey(s.bye, "q")
+    Enemy = []
 ee1 = ee2 = False
 
 # Draw all one time
