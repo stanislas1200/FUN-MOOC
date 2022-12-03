@@ -1,13 +1,15 @@
+"""
+Prenom : Stanislas
+Nom : Godin
+Matricule : 000575477
+Section : B1-INFO
+"""
+
 import sys
-from operator import itemgetter
 from random import randint
 
 """ Bug:
-
--| Can't go above 99
--| No input
-
-
+-| Can't make a board above 99
 """
 
 
@@ -96,10 +98,14 @@ def propagate_click(game_board, reference_board, pos_x, pos_y):
 
 def parse_input(n, m):
     """Parse the input"""
+    # Ask for the input
     print("Enter the coordinates of the cell you want to click and the type ([c/f] x y):", end=" ")
-    cell, x, y = input().split()
-    parse_input(n, m) if check.input(x, y, n, m) else None
-    return cell, int(x), int(y)
+    # Get the input
+    inp = input()
+    # Check if the input is valid
+    ret = check.input(inp, n, m)
+    # Return the input if it is valid
+    return ret if ret else parse_input(n, m)
 
 
 def check_win(game_board, reference_board, mine_list, total_flags):
@@ -188,40 +194,60 @@ def print_board(board):
 
 
 class check:
+    @staticmethod
     def args(argv):
         """Check args"""
         error = 0
+        # Color the error message
         print(rgb(189, 0, 0), end="")
+        # If the number of arguments is not 3
         if len(argv) != 4:
             print("Usage: python3 demineur.py <width> <height> <nb_mines>")
             error = 1
-        if (not argv[1].isdigit()) or (not argv[2].isdigit()) or (not argv[3].isdigit()):
-            print("Error: width, height and nb_mines must be integers")
+        elif (not argv[1].isdigit()) or (not argv[2].isdigit()) or (not argv[3].isdigit()):
+            print("Error: width, height and nb_mines must be integers and positive")
             error = 1
-        if (int(argv[1]) < 1) or (int(argv[2]) < 1) or (int(argv[3]) < 1):
-            print("Error: width, height and nb_mines must be positive")
+        elif (int(argv[1]) < 4) or (int(argv[2]) < 4) or (int(argv[3]) < 1):
+            print("Error: width, height must be greater than 3 and nb_mines must be greater than 0")
             error = 1
-        if int(argv[3]) >= int(argv[1]) * int(argv[2]):
+        elif int(argv[3]) >= int(argv[1]) * int(argv[2]):
             print("Error: too many mines")
             error = 1
+        # Reset the color
         print(rgb(255, 255, 255), end="")
+        # Return the error code
         return error
 
-    def input(x, y, width, height):
+    @staticmethod
+    def input(inp, width, height):
         """Check input"""
         error = 0
+        cell = x = y = None
+        # Color the error message
         print(rgb(189, 0, 0), end="")
-        if not x.isdigit() or not y.isdigit():
-            print("Error: x and y must be integers")
+        # If no input or not 3 arguments
+        if not inp or len(inp.split()) != 3:
+            print("Error: invalid input length")
             error = 1
-        elif (int(x) < 0) or (int(y) < 0):
-            print("Error: x and y must be positive")
-            error = 1
-        elif (int(x) >= width) or (int(y) >= height):
-            print("Error: x and y must be in the grid")
-            error = 1
+        else:
+            # Split the input
+            cell, x, y = inp.split()
+            # If the cell is not c or f
+            if cell not in ["c", "f"]:
+                print("Error: action type must be c or f")
+                error = 1
+            # If the x or y is not an integer or is not positive
+            if not x.isdigit() or not y.isdigit():
+                print("Error: x and y must be integers and positive")
+                error = 1
+            # If the x or y is out of the board
+            elif (int(x) >= width) or (int(y) >= height):
+                print("Error: x and y must be in the board")
+                error = 1
+        # Reset the color
         print(rgb(255, 255, 255), end="")
-        return error
+        # Return the input if valid or None if not
+        return (cell, int(x), int(y)) if not error else None
 
 
 def start_game(game_board, reference_board, mine_list):
