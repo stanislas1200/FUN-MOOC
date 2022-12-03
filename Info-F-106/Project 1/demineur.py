@@ -14,46 +14,177 @@ from random import randint
 def rgb(r, g, b): return f"\u001b[38;2;{r};{g};{b}m"
 
 
-def init_grid(width, height, nb_mines, grid):
-    """Init the grid with x mines randomly on the board and returns the grid"""
-    while nb_mines > 0:
+def create_board(n, m):
+    """Create a board and return it Useless function"""
+    return [['.'] * n for i in range(m)]
+
+
+def get_size(board):
+    """Returns the size of the board Useless"""
+    return len(board[0]), len(board)
+
+
+def place_mines(reference_board, number_of_mines, first_pos_x, first_pos_y):
+    """Place the mines on the board"""
+    # Get the size of the board
+    width, height = get_size(reference_board)
+    # Create an empty list
+    ret = []
+    # Place the mines while there are still mines to place
+    while number_of_mines > 0:
+        # Get a random position
         x = randint(0, width - 1)
         y = randint(0, height - 1)
-        if grid[y][x] == 0:
-            grid[y][x] = 9
-            nb_mines -= 1
-    return grid
+        # If the position is not already a mine and is not the first click
+        if reference_board[y][x] != 9 and (x, y) != (first_pos_x, first_pos_y):
+            # Place the mine on the board
+            reference_board[y][x] = 9
+            # Add the position to the list
+            ret.append((x, y))
+            # Remove a mine from the number of mines to place
+            number_of_mines -= 1
+    # Return the list of mines
+    return ret
 
 
-def print_grid(width, height, grid):
-    """Prints the grid"""
+def get_mines_around(reference_board, pos_x, pos_y):
+    """Get the number of mines around"""
+    # Make a variable to store the number of mines
+    mines = 0
+    # For each cell around
+    for i in range(-1, 2):
+        for j in range(-1, 2):
+            # If the position is valid
+            if 0 <= pos_x + i < len(reference_board[0]) and 0 <= pos_y + j < len(reference_board):
+                # If the cell is a mine
+                if reference_board[pos_y + j][pos_x + i] == 9:
+                    # Add a mine to the number of mines
+                    mines += 1
+    # Return the number of mines
+    return mines
+
+
+def fill_in_board(reference_board):
+    """Fill in the board with the number of mines around"""
+    # Get the size of the board
+    width, height = get_size(reference_board)
+    # For each cell
+    for y in range(height):
+        for x in range(width):
+            # If the position is not a mine
+            if reference_board[y][x] != 9:
+                # Get the number of mines around
+                reference_board[y][x] = get_mines_around(reference_board, x, y)
+
+
+def propagate_click(game_board, reference_board, pos_x, pos_y):
+    """Propagate the click"""
+    # If the position is an empty cell
+    if game_board[pos_y][pos_x] == '.':
+        # Update the game board
+        game_board[pos_y][pos_x] = reference_board[pos_y][pos_x]
+        # If the position is an 0
+        if reference_board[pos_y][pos_x] == 0:
+            # For each cell around
+            for i in range(-1, 2):
+                for j in range(-1, 2):
+                    # If the position is valid
+                    if 0 <= pos_x + i < len(game_board[0]) and 0 <= pos_y + j < len(game_board):
+                        # Propagate the click
+                        propagate_click(game_board, reference_board, pos_x + i, pos_y + j)
+
+
+def parse_input(n, m):
+    """Parse the input"""
+    print("Enter the coordinates of the cell you want to click and the type ([c/f] x y):", end=" ")
+    cell, x, y = input().split()
+    parse_input(n, m) if check.input(x, y, n, m) else None
+    return cell, int(x), int(y)
+
+
+def check_win(game_board, reference_board, mine_list, total_flags):
+    """Check if the game is won"""
+    # Get the size of the board
+    width, height = get_size(game_board)
+    undisclosed_cells = 0
+    # For each cell
+    for y in range(height):
+        for x in range(width):
+            # If the cell is not revealed
+            if game_board[y][x] == '.' or game_board[y][x] == 'F':
+                undisclosed_cells += 1
+    # If the number of undisclosed cells is equal to the number of mines
+    if undisclosed_cells == len(mine_list):
+        return True
+
+    # If the number of flags is equal to the number of mines
+    if total_flags == len(mine_list):
+        # if all the mines are flagged
+        for i in mine_list:
+            # If a mine is not flagged
+            if game_board[i[1]][i[0]] != 'F':
+                return False
+        return True
+    return False
+
+
+def init_game(n, m, number_of_mines):
+    """Init the game"""
+    # Create the board
+    reference_board = create_board(n, m)
+    # Print the board
+    print_board(reference_board)
+    # Ask for the first click
+    cell, x, y = parse_input(n, m)
+    # Place the mines
+    mine_list = place_mines(reference_board, number_of_mines, x, y)
+    # Fill in the reference board
+    fill_in_board(reference_board)
+    # Create the game board
+    game_board = create_board(n, m)
+    # Propagate the first click
+    propagate_click(game_board, reference_board, x, y)
+    # Return the 2 boards and the mine list
+    return game_board, reference_board, mine_list
+
+
+def print_board(board):
+    """Prints the board"""
+    # Get the size of the board
+    width, height = get_size(board)
+    # Get the max number of digits
     biggest_y_number = len(str(height))
     biggest_x_number = len(str(width))
     # Print x-axis
     for i in range(biggest_x_number):
+        # Print the first space
         print(" " * (biggest_y_number + 1), end="")
+        # Print the numbers
         for x in range(width):
             x = str(x)
             print(" " + (x[-i] if len(x) > 1 or i == biggest_x_number - 1 else " "), end=" ")
+        # Print a new line
         print()
 
-    # Top border
-    print(" " * (biggest_y_number + 1), end="")
-    print("———" * width)
+    # Print top border
+    print(" " * (biggest_y_number + 1) + "———" * width)
 
     # Print y-axis and grid
     for y in range(height):
         # Print y number and left border
         print(str(y).rjust(biggest_y_number), end="|")
         for x in range(width):
-            print((rgb(255, 0, 0) if grid[y][x] == 9 else rgb(255, 255, 255)) + " " + str(grid[y][x])
-                  + rgb(255, 255, 255), end=" ")
-        # Right border
+            if board[y][x] == 9:
+                print(rgb(255, 0, 0) + " x" + rgb(255, 255, 255), end=" ")
+            elif board[y][x] == "F":
+                print(rgb(0, 255, 0) + " F" + rgb(255, 255, 255), end=" ")
+            else:
+                print(" " + str(board[y][x]), end=" ")
+        # print right border
         print("|")
 
-    # Bottom border
-    print(" " * (biggest_y_number + 1), end="")
-    print("———" * width)
+    # Print bottom border
+    print(" " * (biggest_y_number + 1) + "———" * width)
 
 
 class check:
@@ -93,36 +224,58 @@ class check:
         return error
 
 
-def start_game(width, height, reference_board, game_board):
+def start_game(game_board, reference_board, mine_list):
     """Start the game"""
+    # Get the size of the board
+    width, height = get_size(game_board)
+    total_flags = 0
+    # Print the board
+    print_board(game_board)
+    # Check if the game is won
+    if check_win(game_board, reference_board, mine_list, total_flags=0):
+        # Print that the player won then exit
+        print("You won!")
+        exit(0)
+    # While the game is not won or lost
     while True:
-        #print_grid(width, height, reference_board)
-        print_grid(width, height, game_board)
-        x, y = input("x y: ").split()
-        if not check.input(x, y, width, height):
-            if reference_board[int(y)][int(x)] == 9:
-                print("Game over")
-                break
+        # Ask for the next click
+        cell, x, y = parse_input(width, height)
+        # If the position is a mine and the cell is a not flag
+        if (x, y) in mine_list and cell == 'c':
+            # Print the reference_board and that the player lost then exit
+            print_board(reference_board)
+            print(rgb(255, 0, 0) + "You lost!" + rgb(255, 255, 255))
+            exit(0)
+        else:
+            # If the cell is a flag
+            if cell == 'f':
+                # If the cell is not flagged
+                if game_board[y][x] == '.':
+                    # Flag the cell
+                    game_board[y][x] = 'F'
+                    total_flags += 1
+                # If the cell is flagged
+                elif game_board[y][x] == 'F':
+                    # Unflag the cell
+                    game_board[y][x] = '.'
+                    total_flags -= 1
+                else:
+                    print("You can't flag a revealed cell")
             else:
-                game_board[int(y)][int(x)] = reference_board[int(y)][int(x)]
+                # Propagate the click
+                propagate_click(game_board, reference_board, x, y)
+            # Print the board
+            print_board(game_board)
+            # If the game is won
+            if check_win(game_board, reference_board, mine_list, total_flags):
+                # Print that the player won then exit
+                print(rgb(0, 255, 0) + "You won!" + rgb(255, 255, 255))
+                exit(0)
 
 
 def main(argv):
     exit(1) if check.args(argv) == 1 else None
-    # Init data
-    data = {
-        "width": int(argv[1]),
-        "height": int(argv[2]),
-        "nb_mines": int(argv[3]),
-        "reference_board": [[0] * int(argv[1]) for i in range(int(argv[2]))],
-        "game_board": [["."] * int(argv[1]) for i in range(int(argv[2]))],
-    }
-    # Init grid with mines
-    data["reference_board"] = init_grid(*itemgetter("width", "height", "nb_mines", "reference_board")(data))
-    print("width: " + str(data["width"]), "height: " + str(data["height"]), "mines: " + str(data["nb_mines"]), sep="\t")
-    start_game(*itemgetter("width", "height", "reference_board", "game_board")(data))
-    # print_grid(*itemgetter("width", "height", "reference_board")(data))
-    # print_grid(*itemgetter("width", "height", "game_board")(data))
+    start_game(*init_game(int(argv[1]), int(argv[2]), int(argv[3])))
 
 
 if __name__ == "__main__":
