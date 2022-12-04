@@ -51,7 +51,6 @@ def place_mines(reference_board, number_of_mines, first_pos_x, first_pos_y):
             # Remove a mine from the number of mines to place
             number_of_mines -= 1
     # Return the list of mines
-    print(ret)
     return ret
 
 
