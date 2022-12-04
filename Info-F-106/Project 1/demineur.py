@@ -12,8 +12,6 @@ from random import randint
 """ Bug:
 -| Slow on 2000x2000
 -| Seg fault on python3 demineur.py 20 1500 50
--| Forgot to add the get_neighbours function haha
--| First click is always a 0 like not in the real game
 -| Need Fusion of main and start_game
 """
 
@@ -31,6 +29,16 @@ def get_size(board):
     return len(board[0]), len(board)
 
 
+def get_neighbours(x, y):
+    """Get the neighbours of a cell"""
+    ret = []
+    for i in range(-1, 2):
+        for j in range(-1, 2):
+            if i != 0 or j != 0:
+                ret.append((x + i, y + j))
+    return ret
+
+
 def place_mines(reference_board, number_of_mines, first_pos_x, first_pos_y):
     """Place the mines on the board"""
     # Get the size of the board
@@ -42,12 +50,13 @@ def place_mines(reference_board, number_of_mines, first_pos_x, first_pos_y):
         # Get a random position
         x = randint(0, width - 1)
         y = randint(0, height - 1)
-        # If the position is not already a mine and is not the first click
-        if reference_board[y][x] != 9 and (x, y) != (first_pos_x, first_pos_y):
+        # If the position is not already a mine and is not the first click or neighbours of the first click
+        if reference_board[y][x] != 9 and (x, y) not in get_neighbours(first_pos_x, first_pos_y)\
+                and (x, y) != (first_pos_x, first_pos_y):
             # Place the mine on the board
             reference_board[y][x] = 9
             # Add the position to the list
-            ret.append((x, y))
+            ret.append([x, y])
             # Remove a mine from the number of mines to place
             number_of_mines -= 1
     # Return the list of mines
@@ -274,7 +283,7 @@ def start_game(game_board, reference_board, mine_list):
         # Ask for the next click
         cell, x, y = parse_input(width, height)
         # If the position is a mine and the cell is a not flag
-        if (x, y) in mine_list and cell == 'c':
+        if [x, y] in mine_list and cell == 'c':
             # Print the reference_board and that the player lost then exit
             print_board(reference_board)
             print(rgb(255, 0, 0) + "You lost!" + rgb(255, 255, 255))
