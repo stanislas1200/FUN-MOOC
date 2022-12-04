@@ -12,7 +12,7 @@ from random import randint
 """ Bug:
 -| Slow on 2000x2000
 -| Seg fault on python3 demineur.py 20 1500 50
--| Need Fusion of main and start_game
+-| Unknown test cuz lambda missing x argument
 """
 
 
@@ -266,7 +266,14 @@ class check:
         return (cell, int(x), int(y)) if not error else None
 
 
-def start_game(game_board, reference_board, mine_list):
+def main():
+    argv = sys.argv
+    # Check the arguments
+    exit(0) if check.args(argv) == 1 else None
+    if (int(argv[1]) * int(argv[2])) > 1000:
+        sys.setrecursionlimit(int(argv[1]) * int(argv[2]))
+    # Init the game
+    game_board, reference_board, mine_list = init_game(int(argv[1]), int(argv[2]), int(argv[3]))
     """Start the game"""
     # Get the size of the board
     width, height = get_size(game_board)
@@ -276,8 +283,8 @@ def start_game(game_board, reference_board, mine_list):
     # Check if the game is won
     if check_win(game_board, reference_board, mine_list, total_flags=0):
         # Print that the player won then exit
-        print("You won!")
-        exit(0)
+        print(rgb(0, 255, 0) + "You won!" + rgb(255, 255, 255))
+        return 1
     # While the game is not won or lost
     while True:
         # Ask for the next click
@@ -287,7 +294,7 @@ def start_game(game_board, reference_board, mine_list):
             # Print the reference_board and that the player lost then exit
             print_board(reference_board)
             print(rgb(255, 0, 0) + "You lost!" + rgb(255, 255, 255))
-            exit(0)
+            return 0
         else:
             # If the cell is a flag
             if cell == 'f':
@@ -312,15 +319,7 @@ def start_game(game_board, reference_board, mine_list):
             if check_win(game_board, reference_board, mine_list, total_flags):
                 # Print that the player won then exit
                 print(rgb(0, 255, 0) + "You won!" + rgb(255, 255, 255))
-                exit(0)
-
-
-def main():
-    argv = sys.argv
-    exit(1) if check.args(argv) == 1 else None
-    if (int(argv[1]) * int(argv[2])) > 1000:
-        sys.setrecursionlimit(int(argv[1]) * int(argv[2]))
-    start_game(*init_game(int(argv[1]), int(argv[2]), int(argv[3])))
+                return 1
 
 
 if __name__ == "__main__":
