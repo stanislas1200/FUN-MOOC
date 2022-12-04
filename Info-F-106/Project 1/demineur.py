@@ -21,7 +21,7 @@ def rgb(r, g, b): return f"\u001b[38;2;{r};{g};{b}m"
 
 def create_board(n, m):
     """Create a board and return it Useless function"""
-    return [['.'] * n for i in range(m)]
+    return [['.'] * n for _ in range(m)]
 
 
 def get_size(board):
@@ -223,8 +223,9 @@ class check:
         elif (int(argv[1]) < 4) or (int(argv[2]) < 4) or (int(argv[3]) < 1):
             print("Error: width, height must be greater than 3 and nb_mines must be greater than 0")
             error = 1
-        elif (int(argv[1]) > 1200 or int(argv[2]) > 1200):
-            print("Error: width and height must be less than 1200, otherwise the game will be too slow and u need a big screen °~° also it can overflow")
+        elif int(argv[1]) > 1200 or int(argv[2]) > 1200:
+            print("Error: width and height must be less than 1200, otherwise the game will be too slow and u need a "
+                  "big screen °~° also it can overflow")
             error = 1
         elif int(argv[3]) >= int(argv[1]) * int(argv[2]) - 1:
             print("Error: too many mines")
