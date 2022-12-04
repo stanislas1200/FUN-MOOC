@@ -8,8 +8,13 @@ Section : B1-INFO
 import sys
 from random import randint
 
+
 """ Bug:
--| Can't make a board above 99
+-| Slow on 2000x2000
+-| Seg fault on python3 demineur.py 20 1500 50
+-| Forgot to add the get_neighbours function haha
+-| First click is always a 0 like not in the real game
+-| Need Fusion of main and start_game
 """
 
 
@@ -22,7 +27,7 @@ def create_board(n, m):
 
 
 def get_size(board):
-    """Returns the size of the board Useless"""
+    """Returns the size of the board Useless function"""
     return len(board[0]), len(board)
 
 
@@ -46,6 +51,7 @@ def place_mines(reference_board, number_of_mines, first_pos_x, first_pos_y):
             # Remove a mine from the number of mines to place
             number_of_mines -= 1
     # Return the list of mines
+    print(ret)
     return ret
 
 
@@ -82,7 +88,7 @@ def fill_in_board(reference_board):
 def propagate_click(game_board, reference_board, pos_x, pos_y):
     """Propagate the click"""
     # If the position is an empty cell
-    if game_board[pos_y][pos_x] == '.':
+    if game_board[pos_y][pos_x] == '.' or game_board[pos_y][pos_x] == 'F':
         # Update the game board
         game_board[pos_y][pos_x] = reference_board[pos_y][pos_x]
         # If the position is an 0
@@ -122,7 +128,6 @@ def check_win(game_board, reference_board, mine_list, total_flags):
     # If the number of undisclosed cells is equal to the number of mines
     if undisclosed_cells == len(mine_list):
         return True
-
     # If the number of flags is equal to the number of mines
     if total_flags == len(mine_list):
         # if all the mines are flagged
@@ -162,13 +167,13 @@ def print_board(board):
     biggest_y_number = len(str(height))
     biggest_x_number = len(str(width))
     # Print x-axis
-    for i in range(biggest_x_number):
+    for i in range(biggest_x_number, 0, -1):
         # Print the first space
         print(" " * (biggest_y_number + 1), end="")
         # Print the numbers
         for x in range(width):
             x = str(x)
-            print(" " + (x[-i] if len(x) > 1 or i == biggest_x_number - 1 else " "), end=" ")
+            print(" " + (x[-i] if len(x) >= i else " "), end=" ")
         # Print a new line
         print()
 
@@ -210,7 +215,10 @@ class check:
         elif (int(argv[1]) < 4) or (int(argv[2]) < 4) or (int(argv[3]) < 1):
             print("Error: width, height must be greater than 3 and nb_mines must be greater than 0")
             error = 1
-        elif int(argv[3]) >= int(argv[1]) * int(argv[2]):
+        elif (int(argv[1]) > 1200 or int(argv[2]) > 1200):
+            print("Error: width and height must be less than 1200, otherwise the game will be too slow and u need a big screen °~° also it can overflow")
+            error = 1
+        elif int(argv[3]) >= int(argv[1]) * int(argv[2]) - 1:
             print("Error: too many mines")
             error = 1
         # Reset the color
@@ -286,7 +294,7 @@ def start_game(game_board, reference_board, mine_list):
                     game_board[y][x] = '.'
                     total_flags -= 1
                 else:
-                    print("You can't flag a revealed cell")
+                    print(rgb(255, 255, 0) + "You can't flag a revealed cell!" + rgb(255, 255, 255))
             else:
                 # Propagate the click
                 propagate_click(game_board, reference_board, x, y)
@@ -299,10 +307,13 @@ def start_game(game_board, reference_board, mine_list):
                 exit(0)
 
 
-def main(argv):
+def main():
+    argv = sys.argv
     exit(1) if check.args(argv) == 1 else None
+    if (int(argv[1]) * int(argv[2])) > 1000:
+        sys.setrecursionlimit(int(argv[1]) * int(argv[2]))
     start_game(*init_game(int(argv[1]), int(argv[2]), int(argv[3])))
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
